@@ -29,7 +29,7 @@ entry *create_entry_node(char *, char *);  /* Create a new entry
                                               node. Has to be freed by
                                               user. */
 void free_entries(entry *); /* TBD Given the first node of a linked list
-                               of entries, will free all the nodes */ 
+                               of entries, will free all the nodes */
 
 void write_all_entries(entry *); /* Given the first node of a linked
                                     list of entries, will delete the
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   if (argc == 1) {
     print_usage("Insufficient arguments", argv[0]);
     exit(1);
-  } 
+  }
 
   if (strcmp(argv[1], "add") == 0) {   /* Handle add */
     if (argc != 4) {
@@ -91,10 +91,16 @@ FILE *open_db_file() {
   }
   return fp;
 }
-  
+
 void free_entries(entry *p) {
   /* TBD */
-  printf("Memory is not being freed. This needs to be fixed!\n");  
+  entry *tmp = NULL;
+  while (p != NULL) {
+    tmp->next = p->next;
+    free(p);
+    p = tmp->next;
+  }
+  printf("Memory is not being freed. This needs to be fixed!\n");
 }
 
 void print_usage(char *message, char *progname) {
@@ -147,7 +153,7 @@ entry *load_entries(FILE *fp) {
 
     %20[^,\n] will match a string of characters with a maximum length
      of 20 characters that doesn't have a comma(,) or a newline(\n).
-  */        
+  */
   while (fscanf(fp, "%20[^,\n],%20[^,\n]\n", name, phone) != EOF) {
     tmp = create_entry_node(name, phone);
     if (ret == NULL)
@@ -176,13 +182,16 @@ void add(char *name, char *phone) {
 }
 
 void list(FILE *db_file) {
+  int count = 0;
   entry *p = load_entries(db_file);
   entry *base = p;
   while (p!=NULL) {
     printf("%-20s : %10s\n", p->name, p->phone);
     p=p->next;
+    count++;
   }
   /* TBD print total count */
+  printf("Total entries : %i", count);
   free_entries(base);
 }
 
@@ -197,19 +206,50 @@ int delete(FILE *db_file, char *name) {
     if (strcmp(p->name, name) == 0) {
       /* Matching node found. Delete it from the linked list.
          Deletion from a linked list like this
-   
+
              p0 -> p1 -> p2
-         
+
          means we have to make p0->next point directly to p2. The p1
          "node" is removed and free'd.
-         
-         If the node to be deleted is p0, it's a special case. 
+
+         If the node to be deleted is p0, it's a special case.
       */
 
       /* TBD */
+      if (prev == NULL){
+        free(p);
+      }
+      else{
+        prev->next = p->next;
+        free(p);
+      }
+      deleted++;
+      break;
     }
+    prev = p;
+    p = p->next;
+  }
+  if (!deleted){
+    printf("no match\n");
   }
   write_all_entries(base);
   free_entries(base);
   return deleted;
+}
+
+int search(FILE *db_file, char *name){
+  entry *p = load_entries(db_file);
+  entry *base = p;
+  int found = 0;
+  while (p!=NULL) {
+    if (strcmp(p->name, name) == 0) {
+      printf("%10s\n", p->phone);
+      found++;
+      break;
+    }
+  }
+  if (!found){
+    printf("no match\n");
+  }
+  free_entries(base);
 }
