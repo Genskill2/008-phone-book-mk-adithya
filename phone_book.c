@@ -62,7 +62,20 @@ int main(int argc, char *argv[]) {
     fclose(fp);
     exit(0);
   } else if (strcmp(argv[1], "search") == 0) {  /* Handle search */
-    printf("NOT IMPLEMENTED!\n"); /* TBD  */
+		if (argc != 3) {
+      print_usage("Improper arguments for search", argv[0]);
+      exit(1);
+		}
+		FILE *fp = open_db_file();
+		char *name = argv[2];
+    if (!search(fp, name)){
+			printf("no match\n");
+      fclose(fp);
+      exit(1);
+		}
+    fclose(fp);
+    exit(0);
+    //printf("NOT IMPLEMENTED!\n"); /* TBD  */
   } else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
     if (argc != 3) {
       print_usage("Improper arguments for delete", argv[0]);
@@ -96,11 +109,12 @@ void free_entries(entry *p) {
   /* TBD */
   entry *tmp = NULL;
   while (p != NULL) {
-    tmp->next = p->next;
+    tmp = p->next;
     free(p);
-    p = tmp->next;
+		p = tmp;
   }
-  printf("Memory is not being freed. This needs to be fixed!\n");
+	p = NULL;
+  //printf("Memory is not being freed. This needs to be fixed!\n");
 }
 
 void print_usage(char *message, char *progname) {
@@ -191,7 +205,7 @@ void list(FILE *db_file) {
     count++;
   }
   /* TBD print total count */
-  printf("Total entries : %i", count);
+  printf("Total entries : %i\n", count);
   free_entries(base);
 }
 
@@ -229,9 +243,6 @@ int delete(FILE *db_file, char *name) {
     prev = p;
     p = p->next;
   }
-  if (!deleted){
-    printf("no match\n");
-  }
   write_all_entries(base);
   free_entries(base);
   return deleted;
@@ -247,9 +258,8 @@ int search(FILE *db_file, char *name){
       found++;
       break;
     }
-  }
-  if (!found){
-    printf("no match\n");
+	p=p->next;
   }
   free_entries(base);
+	return found;
 }
