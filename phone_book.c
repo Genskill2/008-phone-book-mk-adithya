@@ -231,7 +231,7 @@ int delete(FILE *db_file, char *name) {
 
       /* TBD */
       if (prev == NULL){
-        free(p);
+        p = NULL;
       }
       else{
         prev->next = p->next;
