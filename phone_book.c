@@ -231,7 +231,8 @@ int delete(FILE *db_file, char *name) {
 
       /* TBD */
       if (prev == NULL){
-        del = p;
+				del = p;
+				base = p->next;
 				p = p->next;
     		free(del);
       }
@@ -242,8 +243,10 @@ int delete(FILE *db_file, char *name) {
       deleted++;
       break;
     }
+		if (!deleted){
     prev = p;
     p = p->next;
+		}
   }
   write_all_entries(base);
   free_entries(base);
